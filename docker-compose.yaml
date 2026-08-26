@@ -1,0 +1,33 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: dockerfile.local
+    pull_policy: never
+    ports:
+      - 3000:3000
+      - 51212:51212
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+  database:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    container_name: postgres-dev
+    env_file: ./database/.env
+    environment:
+      POSTGRES_DB: typescript-api
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+  adminer:
+    image: adminer
+    restart: always
+    depends_on: 
+      - database
+    ports:
+      - 8080:8080
+volumes:
+  postgres_data:
