@@ -1,8 +1,12 @@
-import "./config/env"
-import express from "express"
+import "./config/env";
+import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import { errorHandlerMiddleware, notFoundMiddleware } from "./middlewares/errorHandler";
+import {
+  errorHandlerMiddleware,
+  notFoundMiddleware,
+} from "./middlewares/errorHandler";
+import { disconnectFromDatabase } from "./config/database";
 
 const app = express();
 
@@ -10,13 +14,33 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 
-
-
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const port = parseInt(process.env.PORT || "3000");
 
-app.listen(port, () => {
-    console.log(`🔥 App running at http://localhost:${port}.`);
+const server = app.listen(port, () => {
+  console.log(`🔥 App running at http://localhost:${port}.`);
+});
+
+process.on("uncaughtException", async (err) => {
+  console.log(`Uncaught exception: ${err}`);
+  await disconnectFromDatabase();
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log(`Unhandled rejection: ${err}`);
+  server.close(async () => {
+    await disconnectFromDatabase();
+    process.exit(1);
+  });
+});
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully...");
+  server.close(async () => {
+    await disconnectFromDatabase();
+    process.exit(0);
+  });
 });

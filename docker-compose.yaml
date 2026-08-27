@@ -17,7 +17,7 @@ services:
     container_name: postgres-dev
     env_file: ./database/.env
     environment:
-      POSTGRES_DB: typescript-api
+      POSTGRES_DB: blogging-app
     ports:
       - "5432:5432"
     volumes:
