@@ -1,8 +1,8 @@
-import "../env";
 import { Prisma, Roles } from "../../generated/prisma/client";
 import { hashPassword } from "../../utils/hashPassword";
 import { connectToDatabase, disconnectFromDatabase, prisma } from "../database";
 import { faker } from "@faker-js/faker";
+import { env } from "../env";
 
 const admins: Prisma.UserCreateManyInput[] = [
   {
@@ -82,7 +82,7 @@ const main = async () => {
   await Promise.allSettled([
     createUsers(admins),
     createUsers(users),
-    createRandomUsers(parseInt(process.env.SEED_USER_COUNT || "1000")),
+    createRandomUsers(env.SEED_USER_COUNT),
   ]);
 
   await disconnectFromDatabase();

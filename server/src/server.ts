@@ -1,4 +1,3 @@
-import "./config/env";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
@@ -7,6 +6,7 @@ import {
   notFoundMiddleware,
 } from "./middlewares/errorHandler";
 import { connectToDatabase, disconnectFromDatabase } from "./config/database";
+import { env } from "./config/env";
 
 connectToDatabase();
 
@@ -19,10 +19,8 @@ app.use(express.json());
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = parseInt(process.env.PORT || "3000");
-
-const server = app.listen(port, () => {
-  console.log(`🔥 App running at http://localhost:${port}.`);
+const server = app.listen(env.PORT, () => {
+  console.log(`🔥 App running at http://localhost:${env.PORT}.`);
 });
 
 process.on("uncaughtException", async (err) => {
