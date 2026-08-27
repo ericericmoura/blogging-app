@@ -19,12 +19,12 @@ model User {
   lastName       String?  @map("last_name")
   email          String   @unique
   confirmedEmail Boolean  @default(false) @map("confirmed_email")
-  isActive       Boolean  @default(false) @map("is_active")
+  role           Roles    @default(USER)
   passwordHash   String   @map("password_hash")
+  isActive       Boolean  @default(true) @map("is_active")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-
-  blogs Blog[]
+  blogs          Blog[]
 
   @@map("users")
 }
@@ -33,7 +33,7 @@ model Blog {
   id Int @id @default(autoincrement())
 
   title  String
-  slug   String @unique
+  slug   String     @unique
   status BlogStatus
 
   markdown       MarkdownFile @relation(fields: [markdownFileId], references: [id], onDelete: Cascade)
@@ -65,4 +65,9 @@ enum BlogStatus {
   PUBLISHED
   DRAFT
   ARCHIVED
+}
+
+enum Roles {
+  USER
+  ADMIN
 }

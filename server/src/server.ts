@@ -6,7 +6,9 @@ import {
   errorHandlerMiddleware,
   notFoundMiddleware,
 } from "./middlewares/errorHandler";
-import { disconnectFromDatabase } from "./config/database";
+import { connectToDatabase, disconnectFromDatabase } from "./config/database";
+
+connectToDatabase();
 
 const app = express();
 
