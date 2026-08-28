@@ -7,14 +7,19 @@ import {
 } from "./middlewares/errorHandler";
 import { connectToDatabase, disconnectFromDatabase } from "./config/database";
 import { env } from "./config/env";
+import helmet from "helmet";
+import apiV1Routes from "./routes/apiRoutes";
 
 connectToDatabase();
 
 const app = express();
 
+app.use(helmet({}));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
+
+app.use("/api/v1", apiV1Routes);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

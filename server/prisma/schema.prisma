@@ -32,12 +32,13 @@ model User {
 model Blog {
   id Int @id @default(autoincrement())
 
-  title  String
-  slug   String     @unique
-  status BlogStatus
+  title     String
+  slug      String     @unique
+  status    BlogStatus
+  published Boolean    @default(false)
 
-  markdown       MarkdownFile @relation(fields: [markdownFileId], references: [id], onDelete: Cascade)
-  markdownFileId Int          @unique @map("markdown_file_id")
+  markdownOriginalFilename String @map("markdown_original_filename")
+  markdownFilepath         String @map("markdown_filepath")
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @map("user_id")
@@ -47,18 +48,6 @@ model Blog {
 
   @@unique([title, userId])
   @@map("blogs")
-}
-
-model MarkdownFile {
-  id               Int      @id @default(autoincrement())
-  originalFilename String   @map("original_filename")
-  filepath         String
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  blog Blog?
-
-  @@map("markdown_files")
 }
 
 enum BlogStatus {

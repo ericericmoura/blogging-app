@@ -17,7 +17,7 @@ const errorHandlerMiddleware = (
   });
 };
 
-const notFoundMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+const notFoundMiddleware = (req: Request, _res: Response, next: NextFunction): void => {
     const message = `No endpoint found for path ${req.originalUrl}`;
     next(new AppError(message, 404));
 }

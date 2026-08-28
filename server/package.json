@@ -20,6 +20,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "^26.3.0",
     "@types/pg": "^8.23.1",
     "nodemon": "^3.1.14",
@@ -34,7 +35,10 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-zod-safe": "^3.2.1",
+    "helmet": "^8.3.0",
     "morgan": "^1.11.0",
+    "multer": "^2.3.0",
     "zod": "^4.4.3"
   }
 }
