@@ -2,7 +2,7 @@ import z from "zod";
 import { env } from "../config/env";
 import { mbToBytes } from "../utils/fileSize";
 
-export const getAllMarkdownQuery = z.object({
+export const getAllBlogsQuery = z.object({
   blogId: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().min(10).max(100).default(10),
   orderByCreationDate: z.enum(["asc", "desc"]).optional()

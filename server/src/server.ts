@@ -25,7 +25,7 @@ app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const server = app.listen(env.PORT, () => {
-  console.log(`🔥 App running at http://localhost:${env.PORT}.`);
+  console.log(`🔥 App running in ${env.NODE_ENV} mode at http://localhost:${env.PORT}.`);
 });
 
 process.on("uncaughtException", async (err) => {

@@ -1,8 +1,8 @@
 import express from "express"
-import markdownRoutes from "./markdownRoutes";
+import blogRoutes from "./blogRoutes";
 
 const apiV1Routes = express.Router();
 
-apiV1Routes.use("/markdown", markdownRoutes);
+apiV1Routes.use("/blogs", blogRoutes);
 
 export default apiV1Routes;
