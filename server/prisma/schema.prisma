@@ -35,7 +35,8 @@ model Blog {
   title     String
   slug      String     @unique
   status    BlogStatus @default(DRAFT)
-  published Boolean    @default(false)
+
+  markdownKey String @map("markdown_key")
 
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @map("user_id")

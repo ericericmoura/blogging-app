@@ -5,7 +5,7 @@ import { AppError } from "../classes/AppError";
 
 export const authMiddleware = (requireConfirmedEmail = true) => {
     return async (req: Request, _res: Response, next: NextFunction) => {
-        const adminId = 1;
+        const adminId = 1003;
 
         req.auth = {
             id: adminId,

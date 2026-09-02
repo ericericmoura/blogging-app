@@ -78,9 +78,10 @@ const createUsers = async (data: Prisma.UserCreateManyInput[]) => {
 
 const main = async () => {
   await connectToDatabase();
+  
+  await createUsers(admins);
 
   await Promise.allSettled([
-    createUsers(admins),
     createUsers(users),
     createRandomUsers(env.SEED_USER_COUNT),
   ]);

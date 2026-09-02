@@ -9,8 +9,6 @@ services:
       - 51212:51212
     volumes:
       - ./server:/app
-    networks:
-      - localstack_network
     depends_on:
       - localstack
   localstack:
@@ -29,8 +27,6 @@ services:
     volumes:
       - '${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack'
       - '/var/run/docker.sock:/var/run/docker.sock'
-    networks:
-      - localstack_network
   database:
     image: postgres
     restart: always
@@ -44,8 +40,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-    networks:
-      - localstack_network
   adminer:
     image: adminer
     restart: always
@@ -55,5 +49,3 @@ services:
       - 8080:8080
 volumes:
   postgres_data:
-networks:
-  localstack_network:
