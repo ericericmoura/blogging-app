@@ -1,6 +1,6 @@
 import express from "express";
 import { createBlog, getAllBlogs } from "../controllers/blogController";
-import { getAllBlogsQuery, markdownFileSchema } from "../validators/markdownValidators";
+import { createBlogBody, getAllBlogsQuery, markdownFileSchema } from "../validators/markdownValidators";
 import validate from "express-zod-safe";
 import { uploadMiddleware } from "../middlewares/uploadMiddleware";
 import { env } from "../config/env";
@@ -13,9 +13,10 @@ const blogRoutes = express.Router();
 blogRoutes
   .post(
     "/",
+    authMiddleware(),
     uploadMiddleware(mbToBytes(env.MAX_MARKDOWN_SIZE_MB)).single("markdown_file"),
     validateFileMiddleware(markdownFileSchema),
-    authMiddleware(),
+    validate({body: createBlogBody}),
     createBlog,
   )
   .get("/", validate({ query: getAllBlogsQuery }), getAllBlogs);

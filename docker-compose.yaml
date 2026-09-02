@@ -44,6 +44,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - localstack_network
   adminer:
     image: adminer
     restart: always

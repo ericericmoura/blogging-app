@@ -1,4 +1,31 @@
 {
   "$schema": "https://assets.requestly.com/local/v1.15.0/body.json",
-  "contentType": "none"
+  "contentType": "multipart/form-data",
+  "formData": [
+    {
+      "id": 1788271292768002,
+      "key": "markdown_file",
+      "value": [
+        {
+          "type": "reference",
+          "id": "README.md-1788271344802",
+          "name": "README.md",
+          "path": "C:\\Users\\ericm\\Downloads\\README.md",
+          "size": 4585,
+          "source": "desktop"
+        }
+      ],
+      "isEnabled": true,
+      "type": "file",
+      "contentType": ""
+    },
+    {
+      "id": 1788373326233001,
+      "key": "title",
+      "value": "My first post",
+      "isEnabled": true,
+      "type": "text",
+      "contentType": ""
+    }
+  ]
 }

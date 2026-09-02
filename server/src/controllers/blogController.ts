@@ -1,36 +1,62 @@
 import { Response, Request, NextFunction } from "express";
 import { ValidatedRequest } from "express-zod-safe";
-import { getAllBlogsQuery } from "../validators/markdownValidators";
+import { createBlogBody, getAllBlogsQuery } from "../validators/markdownValidators";
 import { AppError } from "../classes/AppError";
 import { s3 } from "../config/s3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../config/env";
+import { prisma } from "../config/database";
+import { slugify } from "../utils/slugify";
+import { BlogModel } from "../generated/prisma/models"
 
 const markdownFilesFolder = "blogs/markdown"
 
 export const createBlog = async (
-  req: Request,
+  req: ValidatedRequest<{ body: typeof createBlogBody }>,
   res: Response,
   next: NextFunction,
-) => {    
-  if (req.auth === undefined)
-  {
+) => {
+  if (req.auth === undefined) {
     return next(new AppError("Invalid credentials.", 401));
   }
-  const {id} = req.auth;
 
-  const command = new PutObjectCommand({
+  const { id } = req.auth;
+  const { title, status } = req.body;
+
+  const fileKey = `${markdownFilesFolder}/${crypto.randomUUID()}`;
+
+  const putCommand = new PutObjectCommand({
     Bucket: env.BUCKET_NAME,
-    Key: `${markdownFilesFolder}/${req.file?.originalname}`,
+    Key: fileKey,
     Body: req.file?.buffer,
     ContentType: req.file?.mimetype
   });
 
-  await s3.send(command);
+  await s3.send(putCommand);
   
-  console.log("md file: ", req.file); 
-  
-  res.status(501).json({message: "Not implemented."});
+  try {
+    const blog = await prisma.blog.create({
+      data: {
+        title,
+        status,
+        slug: slugify(title),
+        userId: id,
+      }
+    });
+
+    res.status(201).json({ message: "Blog successfully created", data: blog });
+  } catch (error) {
+    console.log(error);
+
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: env.BUCKET_NAME,
+      Key: fileKey
+    });
+
+    await s3.send(deleteCommand);
+
+    next(new AppError("Failed to create blog.", 400));
+  }
 };
 
 export const getAllBlogs = (
@@ -38,6 +64,6 @@ export const getAllBlogs = (
   res: Response,
   next: NextFunction,
 ) => {
-  res.status(500).json({message: "Not implemented."});
+  res.status(500).json({ message: "Not implemented." });
 };
 
