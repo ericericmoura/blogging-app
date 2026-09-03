@@ -33,7 +33,7 @@ model Blog {
   id Int @id @default(autoincrement())
 
   title     String
-  slug      String     @unique
+  slug      String   
   status    BlogStatus @default(DRAFT)
 
   markdownKey String @map("markdown_key")
@@ -44,6 +44,7 @@ model Blog {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([slug, userId])
   @@unique([title, userId])
   @@map("blogs")
 }

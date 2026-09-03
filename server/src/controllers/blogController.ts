@@ -3,12 +3,10 @@ import { ValidatedRequest } from "express-zod-safe";
 import { createBlogBody, getAllBlogsQuery } from "../validators/markdownValidators";
 import { AppError } from "../classes/AppError";
 import { s3 } from "../config/s3";
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../config/env";
 import { prisma } from "../config/database";
 import { slugify } from "../utils/slugify";
-import { BlogModel } from "../generated/prisma/models"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const markdownFilesFolder = "blogs/markdown"
 
@@ -33,37 +31,30 @@ export const createBlog = async (
     ContentType: req.file?.mimetype
   });
 
-  const [_cmdResult, user] = await Promise.all([
-    s3.send(putCommand),
-    prisma.user.findUniqueOrThrow({where: {id}})
-  ]);
+  await s3.send(putCommand);
 
   try {
     const blog = await prisma.blog.create({
       data: {
         title,
         status,
-        slug: slugify(`${title} by ${user.username}`),
+        slug: slugify(title),
         userId: id,
         markdownKey: fileKey
       }
     });
 
-    const getCommand = new GetObjectCommand({
-      Key: blog.markdownKey,
-      Bucket: env.BUCKET_NAME
-    });
-
-    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-
-    res.status(201).json({ message: "Blog successfully created", data: { ...blog, markdownFileUrl: url} });
-  } catch (error) {
+    res.status(201).json({ message: "Blog successfully created", data: blog });
+  } catch (error: any) {
     const deleteCommand = new DeleteObjectCommand({
       Bucket: env.BUCKET_NAME,
       Key: fileKey
     });
 
-    await s3.send(deleteCommand);
+    await s3.send(deleteCommand)
+      .catch(err => {
+        if (env.NODE_ENV === "development") console.error(`Failed to delete file from AWS: ${err}`);
+      });
 
     next(error);
   }

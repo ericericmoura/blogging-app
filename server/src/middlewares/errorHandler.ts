@@ -3,6 +3,17 @@ import { AppError } from "../classes/AppError";
 import { env } from "../config/env";
 import { Prisma } from "../generated/prisma/client";
 
+type PrismaErrorType = {
+  driverAdapterError ?: {
+    cause?: {
+      originalCode?: string;
+      originalMessage?: string;
+      kind?: string;
+      table?: string;
+    };
+  };
+};
+
 const errorHandlerMiddleware = (
   err: AppError,
   _req: Request,
@@ -14,9 +25,10 @@ const errorHandlerMiddleware = (
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
-      const target = (err.meta?.target as string[])?.join(", ");
+      const errCause = (err.meta as PrismaErrorType | undefined)?.driverAdapterError?.cause;
+
       statusCode = 409;
-      message = `A record with this ${target || "value"} already exists.`;
+      message = `${errCause?.kind}: ${errCause?.originalMessage}`;
     }
     else if (err.code === "P2025") {
       const cause = (err.meta?.cause as string) || "Record not found.";
