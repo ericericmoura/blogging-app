@@ -7,6 +7,8 @@ import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../config/env";
 import { prisma } from "../config/database";
 import { slugify } from "../utils/slugify";
+import { getTotalPages, paginate } from "../utils/paginate";
+import { Prisma } from "../generated/prisma/client";
 
 const markdownFilesFolder = "blogs/markdown"
 
@@ -60,11 +62,41 @@ export const createBlog = async (
   }
 };
 
-export const getAllBlogs = (
+export const getAllBlogs = async (
   req: ValidatedRequest<{ query: typeof getAllBlogsQuery }>,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
-  res.status(500).json({ message: "Not implemented." });
+  const { blogsPerPage, currentPage, orderByCreationDate, title, userId } = req.query;
+
+  const where: Prisma.BlogWhereInput = {
+    ...(userId !== undefined && { userId }),
+    ...(title !== undefined && { title: { contains: title, mode: "insensitive" } }),
+  };
+
+  const skip = paginate(blogsPerPage, currentPage);
+
+  const [blogsCount, blogs] = await Promise.all([
+    prisma.blog.count({ where }),
+    prisma.blog.findMany({
+      where,
+      skip,
+      take: blogsPerPage,
+      orderBy: {
+        createdAt: orderByCreationDate
+      }
+    })
+  ])
+
+  const totalPages = getTotalPages(blogsCount, blogsPerPage);
+
+  res.status(200).json({
+    message: "Successfully retrieved all blogs.",
+    data: blogs, 
+    blogsCount, 
+    currentPage, 
+    blogsPerPage, 
+    totalPages
+  });
 };
 

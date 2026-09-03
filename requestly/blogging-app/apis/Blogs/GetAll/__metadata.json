@@ -1,0 +1,10 @@
+{
+  "$schema": "https://assets.requestly.com/local/v1.15.0/metadata.json",
+  "type": "api",
+  "entryType": "http",
+  "id": "55267a42-2f19-49f3-b86e-bdb16b3152f3",
+  "rank": "",
+  "url": "{{BASE_URL}}/blogs?currentPage=1",
+  "method": "GET",
+  "contentType": "none"
+}

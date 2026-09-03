@@ -4,9 +4,11 @@ import { mbToBytes } from "../utils/fileSize";
 import { $Enums } from "../generated/prisma/client";
 
 export const getAllBlogsQuery = z.object({
-  blogId: z.coerce.number().int().positive().optional(),
-  limit: z.coerce.number().int().positive().min(10).max(100).default(10),
-  orderByCreationDate: z.enum(["asc", "desc"]).optional()
+  userId: z.coerce.number().int().positive().optional(),
+  blogsPerPage: z.coerce.number().int().positive().max(100).default(10),
+  currentPage: z.coerce.number().int().positive().default(1),
+  orderByCreationDate: z.enum(["asc", "desc"]).default("desc"),
+  title: z.string().min(3).optional()
 });
 
 export const createBlogBody = z.object({

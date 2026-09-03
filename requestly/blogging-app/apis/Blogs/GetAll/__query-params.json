@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1788447642495001,
+    "key": "blogsPerPage",
+    "value": "10",
+    "isEnabled": false,
+    "description": "",
+    "dataType": "string"
+  },
+  {
+    "id": 1788447662936002,
+    "key": "currentPage",
+    "value": "1",
+    "isEnabled": true,
+    "description": "",
+    "dataType": "string"
+  },
+  {
+    "id": 1788447663535003,
+    "key": "orderByCreationDate",
+    "value": "asc",
+    "isEnabled": false,
+    "description": "",
+    "dataType": "string"
+  },
+  {
+    "id": 1788447664047004,
+    "key": "title",
+    "value": "",
+    "isEnabled": false,
+    "description": "",
+    "dataType": "string"
+  },
+  {
+    "id": 1788447665552005,
+    "key": "userId",
+    "value": "0",
+    "isEnabled": false,
+    "description": "",
+    "dataType": "string"
+  }
+]
