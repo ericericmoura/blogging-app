@@ -1,14 +1,16 @@
 import { Response, Request, NextFunction } from "express";
 import { ValidatedRequest } from "express-zod-safe";
-import { createBlogBody, getAllBlogsQuery } from "../validators/markdownValidators";
+import { createBlogBody, getAllBlogsQuery } from "../validators/blogValidators";
 import { AppError } from "../classes/AppError";
 import { s3 } from "../config/s3";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Bucket$, DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../config/env";
 import { prisma } from "../config/database";
 import { slugify } from "../utils/slugify";
 import { getTotalPages, paginate } from "../utils/paginate";
 import { Prisma } from "../generated/prisma/client";
+import { idParams } from "../validators/genericValidators"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const markdownFilesFolder = "blogs/markdown"
 
@@ -64,8 +66,7 @@ export const createBlog = async (
 
 export const getAllBlogs = async (
   req: ValidatedRequest<{ query: typeof getAllBlogsQuery }>,
-  res: Response,
-  _next: NextFunction,
+  res: Response
 ) => {
   const { blogsPerPage, currentPage, orderByCreationDate, title, userId } = req.query;
 
@@ -92,11 +93,49 @@ export const getAllBlogs = async (
 
   res.status(200).json({
     message: "Successfully retrieved all blogs.",
-    data: blogs, 
-    blogsCount, 
-    currentPage, 
-    blogsPerPage, 
+    data: blogs,
+    blogsCount,
+    currentPage,
+    blogsPerPage,
     totalPages
   });
 };
 
+export const deleteBlog = async (
+  req: ValidatedRequest<{ params: typeof idParams }>,
+  res: Response
+) => {
+  const {id} = req.params;
+
+  const where = { id };
+
+  const blog = await prisma.blog.findUniqueOrThrow({where});
+
+  const deleteCommand = new DeleteObjectCommand({
+    Bucket: env.BUCKET_NAME,
+    Key: blog.markdownKey
+  })
+
+  await prisma.blog.delete({where});
+  await s3.send(deleteCommand);
+
+  res.status(200).json({ message: "Blog successfully deleted." });
+}
+
+export const getBlogById = async (
+  req: ValidatedRequest<{params: typeof idParams}>,
+  res: Response
+) => {
+  const {id} = req.params;
+
+  const blog = await prisma.blog.findUniqueOrThrow({where: {id}});
+
+  const getCommand = new GetObjectCommand({
+    Bucket: env.BUCKET_NAME,
+    Key: blog.markdownKey
+  })
+  
+  const presignedUrl = await getSignedUrl(s3, getCommand, {expiresIn: 3600});
+  
+  res.status(200).json({ message: "Successfully found blog.", data: { ...blog, markdownPresignedUrl: presignedUrl }});
+}

@@ -11,7 +11,8 @@ type PrismaErrorType = {
       kind?: string;
       table?: string;
     };
-  };
+  },
+  modelName: string
 };
 
 const errorHandlerMiddleware = (
@@ -24,16 +25,16 @@ const errorHandlerMiddleware = (
   let statusCode = err?.statusCode || 500;
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") {
-      const errCause = (err.meta as PrismaErrorType | undefined)?.driverAdapterError?.cause;
+    const meta = (err.meta as PrismaErrorType | undefined);
 
+    const errCause = meta?.driverAdapterError?.cause;
+    if (err.code === "P2002") {
       statusCode = 409;
       message = `${errCause?.kind}: ${errCause?.originalMessage}`;
     }
     else if (err.code === "P2025") {
-      const cause = (err.meta?.cause as string) || "Record not found.";
       statusCode = 404;
-      message = cause;
+      message = `No record was found on table ${meta?.modelName} for the specified query.`;
     }
     else if (err.code === "P2003") {
       const field = (err.meta?.field_name as string) || "related record";
