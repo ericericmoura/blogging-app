@@ -8,7 +8,7 @@ import {
 import { connectToDatabase, disconnectFromDatabase } from "./config/database";
 import { env } from "./config/env";
 import helmet from "helmet";
-import apiV1Routes from "./routes/apiRoutes";
+import apiV1Routes from "./routes/apiV1Routes";
 
 connectToDatabase();
 

@@ -24,6 +24,11 @@ const envSchema = z.object({
   BUCKET_REGION: z.string(),
   SECRET_ACCESS_KEY: z.string(),
   ACCESS_KEY_ID: z.string(),
+  
+  // E-MAIL
+  EMAIL_HOST: z.string(),
+  SMTP_USER: z.string(),
+  SMTP_PASS: z.string(),
 });
 
 const parsedEnv = z.safeParse(envSchema, process.env);
