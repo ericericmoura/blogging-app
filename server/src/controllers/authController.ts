@@ -5,8 +5,10 @@ import { prisma } from "../config/database";
 import bcrypt from "bcrypt"
 import { emailTransporter } from "../config/emailTransporter";
 import { Prisma } from "../generated/prisma/client";
+import { generateJWT } from "../utils/generateJWT";
+import { AppError } from "../classes/AppError";
 
-const userSelect = { username: true, firstName: true, lastName: true, confirmedEmail: true };
+const userSelect = { id: true, username: true, firstName: true, lastName: true, confirmedEmail: true };
 
 export const register = async (
     req: ValidatedRequest<{ body: typeof registerValidator }>,
@@ -39,7 +41,14 @@ export const register = async (
         throw err;
     });
 
-    res.status(201).json({ message: "User successfully registered.", data: user });
+    if (user === null)
+    {
+        return next(new AppError("Failed to create user.", 500));
+    }
+
+    const token = generateJWT({ id: user.id });
+
+    res.status(201).json({ message: "User successfully registered.", data: user, token });
     
     await emailTransporter.sendMail({
         from: '"Blogging App Support" <no-reply@verify.signin.bloggingapp>',

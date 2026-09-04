@@ -8,9 +8,24 @@ if (result.error) {
 }
 
 const envSchema = z.object({
+  JWT_SECRET: z.string()
+    .min(32, "JWT_SECRET must be at least 32 characters long")
+    .refine(
+      (val) => !/^(.)\1+$/.test(val),
+      "JWT_SECRET must not be a repeated character"
+    )
+    .refine(
+      (val) => new Set(val).size >= 8,
+      "JWT_SECRET has too little variety (looks weak/predictable)"
+    )
+    .refine(
+      (val) => !/^(password|secret|changeme|jwtsecret|test)/i.test(val),
+      "JWT_SECRET looks like a placeholder/default value"
+    ),
+
   // DATABASE
   DATABASE_URL: z.url(),
-  
+
   // SERVER
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -18,13 +33,13 @@ const envSchema = z.object({
 
   // CONSTRAINTS
   MAX_MARKDOWN_SIZE_MB: z.coerce.number().int().positive().default(5),
-  
+
   // AWS
   BUCKET_NAME: z.string().default("blogging-app"),
   BUCKET_REGION: z.string(),
   SECRET_ACCESS_KEY: z.string(),
   ACCESS_KEY_ID: z.string(),
-  
+
   // E-MAIL
   EMAIL_HOST: z.string(),
   SMTP_USER: z.string(),
