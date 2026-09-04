@@ -12,7 +12,7 @@ const admins: Prisma.UserCreateManyInput[] = [
     lastName: "Moura",
     role: Roles.ADMIN,
     username: "ericmoura1005",
-    passwordHash: "1005",
+    passwordHash: "@BlogginApp2026",
   },
 ];
 
@@ -24,7 +24,7 @@ const users: Prisma.UserCreateManyInput[] = [
     lastName: "Rosario",
     role: Roles.USER,
     username: "danissauro",
-    passwordHash: "1005",
+    passwordHash: "@BlogginApp2026",
   },
 ];
 

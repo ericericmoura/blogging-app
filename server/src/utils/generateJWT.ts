@@ -1,12 +1,7 @@
 import jwt from "jsonwebtoken"
 import { env } from "../config/env";
+import { AuthPayload } from "../types/express";
 
-type JWTPayload = { id: number };
-
-export const generateJWT = (payload: JWTPayload): string => {
-    return jwt.sign(payload, env.JWT_SECRET);
-}
-
-export const verifyJWT = (token: string): JWTPayload => {
-    return jwt.verify(token, env.JWT_SECRET) as JWTPayload;
+export const generateJWT = (payload: AuthPayload): string => {
+    return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN_SECONDS });
 }

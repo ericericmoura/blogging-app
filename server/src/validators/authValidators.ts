@@ -8,3 +8,8 @@ export const registerValidator = z.object({
     lastName: z.string().min(2).optional(),
     password: strongPasswordSchema
 })
+
+export const loginValidator = z.object({
+    email: z.email(),
+    password: z.string()
+})

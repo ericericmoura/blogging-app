@@ -1,12 +1,13 @@
 import { NextFunction, Response } from "express";
 import { ValidatedRequest } from "express-zod-safe";
-import { registerValidator } from "../validators/authValidators";
+import { loginValidator, registerValidator } from "../validators/authValidators";
 import { prisma } from "../config/database";
 import bcrypt from "bcrypt"
 import { emailTransporter } from "../config/emailTransporter";
-import { Prisma } from "../generated/prisma/client";
+import { Prisma, Roles } from "../generated/prisma/client";
 import { generateJWT } from "../utils/generateJWT";
 import { AppError } from "../classes/AppError";
+import { hashPassword } from "../utils/hashPassword";
 
 const userSelect = { id: true, username: true, firstName: true, lastName: true, confirmedEmail: true };
 
@@ -17,8 +18,7 @@ export const register = async (
 ) => {
     const { email, username, firstName, lastName, password } = req.body;
 
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(password, salt);
+    const passwordHash = await hashPassword(password);
 
     const user = await prisma.user.create({
         data: {
@@ -30,10 +30,8 @@ export const register = async (
         },
         select: userSelect
     }).catch(err => {
-        if (err instanceof Prisma.PrismaClientKnownRequestError)
-        {
-            if (err.code == "P2002")
-            {
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code == "P2002") {
                 res.status(409).json({ statusCode: 409, message: "username and/or e-mail already taken." });
                 return null;
             }
@@ -41,15 +39,14 @@ export const register = async (
         throw err;
     });
 
-    if (user === null)
-    {
+    if (user === null) {
         return next(new AppError("Failed to create user.", 500));
     }
 
-    const token = generateJWT({ id: user.id });
+    const token = generateJWT({ id: user.id, role: Roles.USER });
 
     res.status(201).json({ message: "User successfully registered.", data: user, token });
-    
+
     await emailTransporter.sendMail({
         from: '"Blogging App Support" <no-reply@verify.signin.bloggingapp>',
         to: email,
@@ -60,3 +57,28 @@ export const register = async (
         console.error("Failed to send account verification e-mail: ", err);
     })
 }
+
+export const login = async (
+    req: ValidatedRequest<{ body: typeof loginValidator }>,
+    res: Response,
+    next: NextFunction
+) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+
+        const validPassword = await bcrypt.compare(password, user.passwordHash);
+        if (!validPassword) {
+            throw null;
+        }
+
+        const token = generateJWT({id: user.id, role: user.role});
+
+        res.status(200).json({token});
+    }
+    catch (error) {
+        return next(new AppError("Invalid e-mail or password.", 401));
+    }
+
+};
