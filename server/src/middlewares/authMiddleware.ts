@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/database";
 import { AppError } from "../classes/AppError";
 import jwt from "jsonwebtoken"
 import { AuthPayload } from "../types/express";
 import { env } from "../config/env";
 import { Prisma, Roles } from "../generated/prisma/client";
+import { Request, Response, NextFunction } from "express";
+
 
 export const authMiddleware = (requiredRole: Roles = Roles.ADMIN, requireConfirmedEmail = true) => {
     return async (req: Request, _res: Response, next: NextFunction) => {

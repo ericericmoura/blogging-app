@@ -16,6 +16,11 @@ export const createBlogBody = z.object({
   status: z.enum($Enums.BlogStatus).default($Enums.BlogStatus.DRAFT)
 });
 
+export const updateBlogBody = z.object({
+  title: z.string().min(2).max(500).optional(),
+  status: z.enum($Enums.BlogStatus).optional()
+});
+
 export const markdownFileSchema = z.object({
   originalname: z
     .string()
