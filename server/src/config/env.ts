@@ -8,6 +8,10 @@ if (result.error) {
 }
 
 const envSchema = z.object({
+  // Google oAuth
+  CLIENT_ID: z.string(),
+  CLIENT_SECRET: z.string(),
+
   // JWT Config
   JWT_EXPIRES_IN_SECONDS: z.coerce.number().int().positive().default(900),
   JWT_SECRET: z.string()

@@ -13,3 +13,7 @@ export const loginValidator = z.object({
     email: z.email(),
     password: z.string()
 })
+
+export const googleLoginQueryValidator = z.object({
+    code: z.string()
+})
